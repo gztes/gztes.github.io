@@ -2,6 +2,13 @@ export const siteConfig = {
   name: "Gonzague Teisseire",
   kicker: "MSc @ EDHEC · Lille / London",
   title: "I make things, then I make people care about them.",
+  roles: ["AI tools", "RAG pipelines", "desktop apps", "launch films", "pitches"],
+  stats: [
+    { value: 0.89, decimals: 2, suffix: "", label: "MRR on recall's retrieval eval" },
+    { value: 80, decimals: 0, suffix: "%", label: "mindwatch agreement on held-out labels" },
+    { value: 3, decimals: 0, suffix: "", label: "Top-3 finish, EDHEC Sustainability Challenge", prefix: "Top " },
+    { value: 6, decimals: 0, suffix: "+", label: "founders interviewed on Entrepreneurship Bites" },
+  ],
   photo: {
     src: "/img/hero.jpg",
     alt: "Gonzague speaking on stage at EDHEC",
@@ -33,6 +40,7 @@ export const siteConfig = {
   projects: [
     {
       name: "recall",
+      category: ["AI"],
       description:
         "Ask questions about your own notes and get answers that cite the exact note they came from. A RAG pipeline built from scratch: local embeddings, Chroma, Claude for the answer. Retrieval scored at 0.89 MRR on a labelled question set.",
       link: "https://github.com/gztes/recall",
@@ -47,6 +55,7 @@ export const siteConfig = {
     },
     {
       name: "mindwatch",
+      category: ["AI"],
       description:
         "Reads every save in my mymind, scores it against my goals, watches the best videos, and measures itself: 64% to 80% agreement on held-out hand labels.",
       link: "https://github.com/gztes/mindwatch",
@@ -54,6 +63,7 @@ export const siteConfig = {
     },
     {
       name: "Huddle",
+      category: ["AI", "Product"],
       description:
         "Windows call companion. On-device Whisper transcription, with live suggestions from Gemini while you talk.",
       link: "https://github.com/gztes/huddle",
@@ -62,6 +72,7 @@ export const siteConfig = {
     },
     {
       name: "Clicky for Windows",
+      category: ["AI", "Product"],
       description:
         "Windows rewrite of Farza's macOS assistant Clicky: local voice, multi-screen capture, and an on-screen pointer that shows you where to click.",
       link: "https://github.com/gztes/clicky-windows",
@@ -70,6 +81,7 @@ export const siteConfig = {
     },
     {
       name: "Loop",
+      category: ["Product", "Creative"],
       description:
         "Top-three finalist at the EDHEC Sustainability Challenge 2026. Team project: I built the digital wardrobe app prototype, the website and the promo film, and gave the final pitch.",
       link: "https://github.com/gztes/loop",

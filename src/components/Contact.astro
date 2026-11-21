@@ -1,0 +1,43 @@
+---
+import { siteConfig } from "../config";
+const email = siteConfig.social.email;
+---
+
+<section id="contact" class="px-6 sm:px-12 md:px-16 lg:px-24 pb-20 md:pb-28">
+  <div class="relative rounded-[2rem] bg-gray-950 text-white p-8 sm:p-14 overflow-hidden reveal">
+    <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-40 accent-bg" aria-hidden="true"></div>
+    <p class="font-mono text-sm text-gray-400 relative">Contact</p>
+    <h2 class="relative mt-3 text-4xl sm:text-6xl font-semibold tracking-tight max-w-3xl">
+      Have something worth building?
+    </h2>
+    <p class="relative mt-4 text-lg text-gray-400 max-w-xl">
+      I'm looking for product and AI roles. The fastest way to reach me is email.
+    </p>
+    <div class="relative mt-10 flex flex-col sm:flex-row sm:items-center gap-3">
+      <a href={`mailto:${email}`} class="text-xl sm:text-2xl font-medium underline decoration-gray-600 underline-offset-8 hover:decoration-white break-all">
+        {email}
+      </a>
+      <button
+        id="copy"
+        type="button"
+        data-email={email}
+        class="sm:ml-4 self-start px-5 py-2.5 rounded-full text-sm font-medium bg-white text-gray-900 hover:bg-gray-200 transition-colors"
+      >
+        Copy email
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  const b = document.getElementById("copy") as HTMLButtonElement | null;
+  b?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(b.dataset.email!);
+      b.textContent = "Copied ✓";
+    } catch {
+      b.textContent = "Press Ctrl+C";
+    }
+    setTimeout(() => (b.textContent = "Copy email"), 1800);
+  });
+</script>
