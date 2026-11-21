@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+}
