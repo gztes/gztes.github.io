@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "deploy": "astro build && touch dist/.nojekyll && cd dist && git init -q -b gh-pages && git add -A && git commit -q -m deploy && git push -f https://github.com/gztes/gztes.github.io.git gh-pages && rm -rf .git"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
