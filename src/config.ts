@@ -59,13 +59,16 @@ export const siteConfig = {
       description:
         "Reads every save in my mymind, scores it against my goals, watches the best videos, and measures itself: 64% to 80% agreement on held-out hand labels.",
       link: "https://github.com/gztes/mindwatch",
-      terminal: `# mindwatch pipeline
-export    mymind API -> saves.jsonl
-classify  Claude Haiku -> score 0-10
-report    digest of the best saves
-watch     yt-dlp -> whisper -> Claude
-label     blind hand-labelling page
-eval      precision / recall`,
+      terminal: `$ mindwatch eval --threshold 6
+30 held-out hand labels, worth it = score 6+
+
+high  band (  52 saves): 9/10 worth it
+mid   band ( 300 saves): 9/10 worth it
+low   band (2451 saves): 3/10 worth it
+
+agreement  80%
+precision  99%
+recall     48%`,
       skills: ["Python", "LLM evals"],
     },
     {
