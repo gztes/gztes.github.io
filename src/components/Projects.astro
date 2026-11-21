@@ -58,6 +58,17 @@ const hasProjects = siteConfig.projects && siteConfig.projects.length > 0;
                         </div>
                       )}
 
+                      {project.image && (
+                        <img
+                          src={project.image}
+                          alt={`${project.name} screenshot`}
+                          loading="lazy"
+                          class="w-full aspect-[16/9] object-cover object-top rounded-lg sm:rounded-xl border border-gray-200 mb-6"
+                        />
+                      )}
+                      {project.terminal && (
+                        <pre class="w-full overflow-hidden rounded-lg sm:rounded-xl bg-gray-950 text-gray-300 text-[11px] sm:text-sm leading-relaxed p-4 sm:p-6 mb-6 font-mono whitespace-pre-wrap">{project.terminal}</pre>
+                      )}
                       <div class="space-y-4">
                         <div>
                           <span

@@ -21,7 +21,16 @@ const hasEducation = siteConfig.education && siteConfig.education.length > 0;
           <div class="lg:col-span-8">
             <div class="space-y-8">
               {siteConfig.education.map((edu) => (
-                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow duration-300">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300 sm:grid sm:grid-cols-5">
+                  {edu.image && (
+                    <img
+                      src={edu.image}
+                      alt={edu.imageAlt ?? edu.school}
+                      loading="lazy"
+                      class="w-full h-44 sm:h-full object-cover sm:col-span-2"
+                    />
+                  )}
+                  <div class={`p-4 sm:p-5 md:p-6 ${edu.image ? "sm:col-span-3" : "sm:col-span-5"}`}>
                   <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
                     <div>
                       <h3 class="text-lg sm:text-xl font-semibold text-gray-900">
@@ -49,6 +58,7 @@ const hasEducation = siteConfig.education && siteConfig.education.length > 0;
                       </li>
                     ))}
                   </ul>
+                  </div>
                 </div>
               ))}
             </div>

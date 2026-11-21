@@ -1,6 +1,12 @@
 export const siteConfig = {
   name: "Gonzague Teisseire",
+  kicker: "MSc @ EDHEC · Lille / London",
   title: "I make things, then I make people care about them.",
+  photo: {
+    src: "/img/hero.jpg",
+    alt: "Gonzague speaking on stage at EDHEC",
+    caption: "On stage at EDHEC, 2026",
+  },
   description:
     "Gonzague Teisseire: MSc student at EDHEC who builds AI tools and takes them from prototype to pitch.",
   accentColor: "#2547d0",
@@ -30,6 +36,13 @@ export const siteConfig = {
       description:
         "Ask questions about your own notes and get answers that cite the exact note they came from. A RAG pipeline built from scratch: local embeddings, Chroma, Claude for the answer. Retrieval scored at 0.89 MRR on a labelled question set.",
       link: "https://github.com/gztes/recall",
+      terminal: `$ recall search "how big should my position be" -k 2
+[1] 0.63  quant/kelly.md
+    # Kelly criterion  Kelly tells you what fraction
+    of your bankroll to stake on a bet with a known edge...
+[2] 0.62  ml/attention.md
+    # Attention  Attention lets every token in a sequence
+    look at every other token...`,
       skills: ["Python", "Chroma", "Claude API"],
     },
     {
@@ -44,6 +57,7 @@ export const siteConfig = {
       description:
         "Windows call companion. On-device Whisper transcription, with live suggestions from Gemini while you talk.",
       link: "https://github.com/gztes/huddle",
+      image: "/img/huddle.jpg",
       skills: ["Electron", "Whisper", "Gemini"],
     },
     {
@@ -51,6 +65,7 @@ export const siteConfig = {
       description:
         "Windows rewrite of Farza's macOS assistant Clicky: local voice, multi-screen capture, and an on-screen pointer that shows you where to click.",
       link: "https://github.com/gztes/clicky-windows",
+      image: "/img/clicky.jpg",
       skills: ["Electron", "TypeScript"],
     },
     {
@@ -58,6 +73,7 @@ export const siteConfig = {
       description:
         "Top-three finalist at the EDHEC Sustainability Challenge 2026. Team project: I built the digital wardrobe app prototype, the website and the promo film, and gave the final pitch.",
       link: "https://github.com/gztes/loop",
+      image: "/img/loop.jpg",
       skills: ["Prototype", "Pitch", "Film"],
     },
   ],
@@ -111,6 +127,8 @@ export const siteConfig = {
     {
       school: "EDHEC Business School · Lille",
       degree: "MSc Sustainable Business Transformation",
+      image: "/img/edhec.jpg",
+      imageAlt: "Gonzague on stage at EDHEC",
       dateRange: "2026 – 2027",
       achievements: [
         "Sustainable procurement, industrial transformation, business ethics, corporate finance",
@@ -119,6 +137,8 @@ export const siteConfig = {
     {
       school: "Imperial College Business School · London",
       degree: "MSc Innovation, Entrepreneurship & Management",
+      image: "/img/imperial.jpg",
+      imageAlt: "Imperial College Business School campus",
       dateRange: "2025 – 2026",
       achievements: [
         "Venture creation, innovation and technology management, design thinking",
@@ -127,6 +147,8 @@ export const siteConfig = {
     {
       school: "ESCP Business School · Paris / Madrid / London",
       degree: "BSc in Management, three campuses",
+      image: "/img/escp.jpg",
+      imageAlt: "ESCP graduation ceremony",
       dateRange: "2022 – 2025",
       achievements: [
         "Dissertation: AI adoption and human–AI collaboration at work",
