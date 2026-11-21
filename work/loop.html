@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Loop · a wardrobe app, site and film · Gonzague Teisseire</title>
+<meta name="description" content="Case study: Loop, a digital wardrobe app that asks 'should I buy this?' against the clothes you own. Gonzague Teisseire built the app, the site and the film, and pitched it to a top-three finish at the EDHEC Sustainability Challenge.">
+<meta property="og:title" content="Loop · case study · Gonzague Teisseire">
+<meta property="og:description" content="App, site, film and pitch. Top three at the EDHEC Sustainability Challenge.">
+<meta property="og:image" content="../assets/og.png">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=IBM+Plex+Mono:wght@400;500&family=Permanent+Marker&family=Schibsted+Grotesk:wght@400..700&display=swap">
+<link rel="stylesheet" href="../style.css">
+<style>
+.film { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 8px; }
+.film .frame-box { aspect-ratio: 9 / 16; }
+.app-shot { aspect-ratio: auto; margin-top: 8px; }
+.app-shot img { object-position: left top; }
+.weights { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 8px; max-width: 520px; }
+.weights li { display: grid; grid-template-columns: 120px minmax(0, 1fr) 30px; gap: 12px; align-items: center; font-size: 14.5px; }
+.weights i { display: block; height: 6px; background: var(--accent); border-radius: 3px; }
+.weights span:last-child { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
+.beats { list-style: none; margin: 4px 0 14px; padding: 0; display: grid; gap: 6px; counter-reset: b; }
+.beats li { font-family: var(--serif); font-size: clamp(24px, 3vw, 32px); line-height: 1.1; counter-increment: b; display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: baseline; }
+.beats li::before { content: "0" counter(b); font-family: var(--mono); font-size: 11px; color: var(--accent); }
+@media (max-width: 640px) { .film { grid-template-columns: 1fr 1fr; } .film .frame-box:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 5; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <a class="me" href="../index.html">Gonzague Teisseire</a>
+    <ul>
+      <li><a href="../index.html#roll">Roll</a></li>
+      <li><a href="../index.html#selects">Selects</a></li>
+      <li><a href="../index.html#log">Log</a></li>
+      <li><a href="../index.html#notes">Notes</a></li>
+    </ul>
+    <a class="btn solid sm talk" href="../index.html#contact">Get in touch</a>
+  </div>
+</nav>
+<div class="wrap">
+
+  <main id="main">
+    <header class="cs-hero">
+      <a class="back" href="../index.html#loop">← Selected work</a>
+      <p class="eyebrow">Creative direction &amp; storytelling · Sept 2026</p>
+      <h1>Loop</h1>
+      <p class="premise">A digital wardrobe app. You add the clothes you already own, each one gets a sustainability score, and before buying something new you ask: should I buy this?</p>
+      <div class="links">
+        <a class="btn solid" href="https://claude.ai/code/artifact/9fbcdf72-368d-458f-b679-ec69f86f675b" target="_blank" rel="noopener">Open the live app <span class="arr" aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <div class="cs-media rv">
+      <div class="film">
+        <div class="frame-box"><video id="loop-video" src="../assets/loop-clip.mp4" poster="../assets/loop-poster.jpg" muted loop playsinline preload="none" width="480" height="854" aria-label="Opening shots of the Loop film"></video></div>
+        <div class="frame-box"><img src="../assets/loop-dress.jpg" width="720" height="1280" alt="Still from the Loop film: a black slip dress on its hanger"></div>
+        <div class="frame-box"><img src="../assets/loop-rack.jpg" width="720" height="1280" alt="Still from the Loop film: jackets and knitwear on a rail, captioned Buy smarter"></div>
+      </div>
+      <div class="frame-box app-shot"><img src="../assets/loop-app.jpg" loading="lazy" width="1400" height="905" alt="The Loop landing page: Before you buy something new. You already own more than you think."></div>
+      <p class="cap">Stills and the opening of the 43-second film, and the landing page.</p>
+    </div>
+
+    <div class="cs-body">
+      <aside class="rv">
+        <dl class="facts">
+          <div><dt>Context</dt><dd>EDHEC Sustainability Challenge, a fashion and sustainability case competition</dd></div>
+          <div><dt>Team</dt><dd>Team competition; the team wrote the product spec</dd></div>
+          <div><dt>My part</dt><dd>The working app, the marketing site, the 43-second film, and the final pitch</dd></div>
+          <div><dt class="evi">Result</dt><dd>Top three</dd></div>
+        </dl>
+      </aside>
+
+      <div class="steps">
+        <section class="rv">
+          <h2>The problem</h2>
+          <p>The most sustainable piece of clothing is usually one you already own. But at the moment of buying, nobody checks what's already in the wardrobe.</p>
+        </section>
+
+        <section class="rv">
+          <h2>What the app does</h2>
+          <ul>
+            <li><b>Your wardrobe, digitised.</b> Add what you own; every garment gets a sustainability score.</li>
+            <li><b>"Should I buy this?"</b> A potential purchase is compared against what you already have before you spend.</li>
+            <li><b>Plain-language search.</b> "Black clothes for work", "something for 15°C".</li>
+            <li><b>Duplicates by function.</b> It spots that you already own something that does the same job, not just something in the same category.</li>
+          </ul>
+        </section>
+
+        <section class="rv">
+          <h2>The scoring model</h2>
+          <p>Every environmental figure is calculated from a fixed factor table covering fibre, origin and category. Nothing is invented at runtime, and each score is marked "Verified" or "AI estimated" so a guess is never shown as fact.</p>
+          <p>Seven weighted dimensions, out of 100:</p>
+          <ul class="weights" aria-label="Score weights out of 100">
+            <li><span>Material</span><i style="width:100%"></i><span>22</span></li>
+            <li><span>Carbon</span><i style="width:91%"></i><span>20</span></li>
+            <li><span>Durability</span><i style="width:82%"></i><span>18</span></li>
+            <li><span>Water</span><i style="width:59%"></i><span>13</span></li>
+            <li><span>Manufacturing</span><i style="width:45%"></i><span>10</span></li>
+            <li><span>End of life</span><i style="width:41%"></i><span>9</span></li>
+            <li><span>Care</span><i style="width:36%"></i><span>8</span></li>
+          </ul>
+        </section>
+
+        <section class="rv">
+          <h2>What I built</h2>
+          <p>The team set the brief and wrote the product spec. I turned it into things the jury could hold:</p>
+          <ul>
+            <li><b>The app</b>, working rather than mocked: the scoring engine, search, duplicate detection, and a scan flow that rescores live.</li>
+            <li><b>The marketing site</b>, in the same single file, with a guided demo reel.</li>
+            <li><b>The film</b>: a 43-second vertical advert.</li>
+            <li><b>The pitch</b>, delivered to the jury. Everything ran offline, so nothing could fail in the room.</li>
+          </ul>
+        </section>
+
+        <section class="rv">
+          <h2>What the film says</h2>
+          <ol class="beats">
+            <li>"You own about 60 garments."</li>
+            <li>"Every one of them cost water, carbon and land."</li>
+            <li>"Wear more."</li>
+            <li>"Buy smarter."</li>
+          </ol>
+          <p>Four lines, from the stills above: the problem, the cost, then the change in behaviour the app asks for.</p>
+        </section>
+
+        <section class="rv">
+          <h2>The result</h2>
+          <p>Top three at the EDHEC Sustainability Challenge, September 2026. The fixed factor table was our answer to the jury's responsible-AI criterion.</p>
+          <p>The <a href="https://claude.ai/code/artifact/9fbcdf72-368d-458f-b679-ec69f86f675b" target="_blank" rel="noopener">live app</a> is the self-contained file built for the pitch.</p>
+        </section>
+      </div>
+    </div>
+
+    <nav class="next" aria-label="More projects">
+      <a href="huddle.html"><span class="eyebrow">Next · Product &amp; engineering</span><strong>Huddle</strong><span>A private call companion for Windows.</span></a>
+      <a href="unibridge.html"><span class="eyebrow">Next · Entrepreneurship</span><strong>UniBridge</strong><span>Campus visits for students from China and Taiwan.</span></a>
+    </nav>
+  </main>
+
+  <footer class="page-foot"><a href="../index.html">← Gonzague Teisseire</a><a href="mailto:gonzague.teisseire@gmail.com">gonzague.teisseire@gmail.com</a></footer>
+</div>
+<script src="../roll.js"></script>
+</body>
+</html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PERIHELION</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #030208;
+    font-family: 'Helvetica Neue', Arial, sans-serif; color: rgba(240,238,255,0.85); user-select: none; }
+  canvas { display: block; cursor: crosshair; }
+
+  #hud {
+    position: fixed; top: 14px; left: 14px; right: 14px; z-index: 5;
+    padding: 11px 22px; display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    background: rgba(14,8,4,0.3); border: 1px solid rgba(255,220,160,0.08); border-radius: 8px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    pointer-events: none; opacity: 0; transition: opacity 1.5s ease;
+  }
+  .hud-sec { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .title { font-weight: 700; font-size: 15px; letter-spacing: 0.32em; color: #ffedd0;
+    text-shadow: 0 0 14px rgba(255,200,110,0.55); font-family: Georgia, serif; }
+  .hint { color: #665c4d; font-size: 10px; }
+  .lab { color: #776a55; font-size: 9px; }
+  .val { color: #fff; font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .grp { display: flex; align-items: center; gap: 7px; }
+  #mult { font-weight: 700; font-size: 15px; color: #9fd8ff; text-shadow: 0 0 10px currentColor;
+    transition: transform 0.25s cubic-bezier(0.16,1.6,0.3,1); }
+  #mult.hot { color: #ffb54d; }
+  #mult.blaze { color: #ff5d8f; }
+  #mult.bump { transform: scale(1.45); }
+  #streak-wrap .val { color: #ffedd0; }
+
+  #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 3;
+    background: radial-gradient(ellipse at center, transparent 52%, rgba(4,2,10,0.75) 100%);
+    transition: box-shadow 0.35s ease; }
+  #vignette.burn { box-shadow: inset 0 0 200px rgba(255,90,20,0.5); }
+  #vignette.fast { box-shadow: inset 0 0 130px rgba(120,190,255,0.18); }
+
+  .pop { position: fixed; z-index: 6; pointer-events: none; font-weight: 700; font-size: 15px;
+    letter-spacing: 0.14em; text-shadow: 0 0 14px currentColor;
+    animation: rise 1.15s ease-out forwards; }
+  @keyframes rise {
+    0% { opacity: 0; transform: translateY(8px) scale(0.8); }
+    15% { opacity: 1; transform: translateY(0) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-48px) scale(1); } }
+
+  #toast { position: fixed; top: 44%; left: 0; right: 0; text-align: center; z-index: 4;
+    font-weight: 200; font-size: 13px; letter-spacing: 0.7em; text-indent: 0.7em;
+    color: rgba(255,150,90,0.95); opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+  #toast.on { opacity: 1; }
+
+  .overlay { position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 20px; z-index: 10;
+    background: radial-gradient(circle at center, rgba(16,8,4,0.85) 0%, rgba(2,1,6,0.96) 100%);
+    backdrop-filter: blur(10px); transition: opacity 1.4s ease; }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+  .overlay h1 { font-family: Georgia, serif; font-weight: 400;
+    font-size: clamp(30px, 6.5vw, 56px); letter-spacing: 0.5em; text-indent: 0.5em;
+    color: #ffedd0; text-shadow: 0 0 50px rgba(255,180,90,0.55); }
+  .overlay p { font-weight: 300; font-size: 12px; letter-spacing: 0.22em;
+    color: rgba(230,215,190,0.6); text-align: center; line-height: 2.35; max-width: 88vw; }
+  .overlay p b { color: #ffc97a; font-weight: 600; }
+  .overlay p i { color: #9fd8ff; font-style: normal; font-weight: 600; }
+  .btn { margin-top: 24px; padding: 15px 46px; cursor: pointer;
+    background: rgba(255,170,70,0.05); color: #ffc97a;
+    border: 1px solid rgba(255,190,110,0.4); border-radius: 4px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.45em; text-indent: 0.45em;
+    text-transform: uppercase; transition: all 0.4s cubic-bezier(0.16,1,0.3,1); font-family: inherit; }
+  .btn:hover { background: rgba(255,170,70,0.2); color: #fff;
+    box-shadow: 0 0 48px rgba(255,180,90,0.35); border-color: #fff; }
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+<div id="vignette"></div>
+
+<div id="hud">
+  <div class="hud-sec">
+    <span class="title">PERIHELION</span>
+    <span class="hint">HOLD — ORBIT · RELEASE — SLING</span>
+  </div>
+  <div class="hud-sec">
+    <div class="grp"><span class="lab">LIGHT</span><span id="score" class="val">0</span></div>
+    <div class="grp"><span class="lab">VELOCITY</span><span id="mult">×1</span></div>
+    <div class="grp" id="streak-wrap"><span class="lab">STREAK</span><span id="streak" class="val">0</span></div>
+    <div class="grp"><span class="lab">SUNS SLUNG</span><span id="slings" class="val">0</span></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div class="overlay" id="intro">
+  <h1>PERIHELION</h1>
+  <p>
+    you are a comet. you cannot steer.<br/><br/>
+    <b>HOLD</b> anywhere — the nearest sun captures you into orbit<br/>
+    tighter orbits spin you up · <b>RELEASE</b> to slingshot out<br/><br/>
+    speed is your multiplier — <i>collect motes while fast</i><br/>
+    <b>flares</b> burn bright near each sun's surface. graze — don't touch.<br/>
+    violet voids drink light. sling past them.
+  </p>
+  <button class="btn" id="start-btn">FALL SUNWARD</button>
+</div>
+
+<script>
+/* ============================================================
+   PERIHELION — one-button orbital slingshot
+   Hold: captured by nearest sun, orbit tightens & spins up.
+   Release: fling out on the tangent. Speed multiplies pickups.
+   ============================================================ */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = innerWidth, H = canvas.height = innerHeight;
+addEventListener('resize', () => { W = canvas.width = innerWidth; H = canvas.height = innerHeight; });
+
+const $ = id => document.getElementById(id);
+const scoreEl=$('score'), multEl=$('mult'), streakEl=$('streak'), slingsEl=$('slings');
+const vignette=$('vignette'), toastEl=$('toast'), hudEl=$('hud');
+
+// ---------- Tunables ----------
+const BASE_SPEED = 3.2;        // comet cruise speed
+const MAX_SPEED = 13;
+const CAPTURE_RANGE = 330;     // how far a sun can grab you
+const SPIN_UP = 2.6;           // speed gain per second while orbiting
+const TIGHTEN = 26;            // orbit radius shrink per second while holding
+const SPEED_DECAY = 0.45;      // free-flight speed decay per second toward BASE
+const MOTE_VALUE = 10, FLARE_VALUE = 60;
+const BURN_PENALTY = 0.15;     // lose 15% light on sun contact
+
+// ---------- State ----------
+const game = { playing:false, t:0, score:0, streak:0, slings:0, shake:0, burnT:0 };
+const comet = {
+  x:0, y:0, vx:BASE_SPEED, vy:0, speed:BASE_SPEED,
+  orbiting:null, orbitR:0, orbitA:0, orbitDir:1,
+  trail:[]
+};
+const cam = { x:0, y:0 };
+let holding = false;
+
+const suns = [], motes = [], flares = [], voids = [], bursts = [], ripples = [];
+
+// ---------- Input: one button ----------
+addEventListener('pointerdown', () => { if (game.playing) holding = true; });
+addEventListener('pointerup',   () => { holding = false; });
+addEventListener('keydown', e => { if (e.code === 'Space') holding = true; });
+addEventListener('keyup',   e => { if (e.code === 'Space') holding = false; });
+
+// ============================================================
+//  WORLD GENERATION — suns seeded ahead, each with a musical note
+// ============================================================
+const SUN_NOTES = [0, 2, 4, 7, 9];  // pentatonic degrees
+function spawnSun(x, y) {
+  const r = 26 + Math.random()*30;
+  const sun = { x, y, r, note: SUN_NOTES[Math.floor(Math.random()*SUN_NOTES.length)],
+    hue: 32 + Math.random()*20, phase: Math.random()*Math.PI*2 };
+  suns.push(sun);
+  // flares hug the surface: risk/reward
+  const nf = 2 + Math.floor(Math.random()*2);
+  for (let i=0;i<nf;i++){
+    const a = Math.random()*Math.PI*2;
+    flares.push({ sun, a, dist: r + 26 + Math.random()*14, t: Math.random()*9 });
+  }
+  // motes scattered in the sun's neighborhood
+  for (let i=0;i<7;i++){
+    const a = Math.random()*Math.PI*2, d = r + 90 + Math.random()*260;
+    motes.push({ x: x + Math.cos(a)*d, y: y + Math.sin(a)*d, phase: Math.random()*Math.PI*2 });
+  }
+  if (Math.random() < 0.4) {
+    const a = Math.random()*Math.PI*2, d = 200 + Math.random()*160;
+    voids.push({ x: x + Math.cos(a)*d, y: y + Math.sin(a)*d, r: 34 + Math.random()*18 });
+  }
+}
+
+function tooClose(x, y, minD) {
+  return suns.some(s => Math.hypot(s.x-x, s.y-y) < minD) ||
+         voids.some(v => Math.hypot(v.x-x, v.y-y) < minD*0.7);
+}
+function populateWorld() {
+  // keep ~10 suns within reach of the comet
+  let guard = 0;
+  while (suns.filter(s => Math.hypot(s.x-comet.x, s.y-comet.y) < 1700).length < 10 && guard++ < 60) {
+    const a = Math.random()*Math.PI*2, d = 500 + Math.random()*1200;
+    const x = comet.x + Math.cos(a)*d, y = comet.y + Math.sin(a)*d;
+    if (!tooClose(x, y, 430)) spawnSun(x, y);
+  }
+  // prune far things
+  const cull = (arr, get) => {
+    for (let i=arr.length-1;i>=0;i--)
+      if (Math.hypot(get(arr[i]).x-comet.x, get(arr[i]).y-comet.y) > 2600) arr.splice(i,1);
+  };
+  cull(suns, s=>s); cull(motes, m=>m); cull(voids, v=>v);
+  for (let i=flares.length-1;i>=0;i--)
+    if (!suns.includes(flares[i].sun)) flares.splice(i,1);
+}
+
+// stars background
+const stars = [];
+for (let i=0;i<650;i++) stars.push({
+  x: Math.random()*8000, y: Math.random()*8000,
+  size: Math.random()*1.6+0.4, op: Math.random()*0.5+0.08, par: Math.random()*0.4+0.06 });
+
+// ============================================================
+//  AUDIO — warm pad, orbit hum per sun, sling arpeggio
+// ============================================================
+const audio = (() => {
+  let ctxA, master, delay, delayGain, started=false;
+  let orbitOsc, orbitGain;
+  const midi = m => 440*Math.pow(2,(m-69)/12);
+  const ROOT = 50; // D major-ish warmth
+  const chords = [[50,57,62,66],[47,54,61,66],[45,52,59,64],[52,59,64,69]];
+  let padOscs=[];
+  function start(){
+    if (started) return; started=true;
+    ctxA = new (window.AudioContext||window.webkitAudioContext)();
+    master = ctxA.createGain(); master.gain.value=0;
+    const comp = ctxA.createDynamicsCompressor();
+    master.connect(comp); comp.connect(ctxA.destination);
+    delay = ctxA.createDelay(2); delay.delayTime.value=0.42;
+    delayGain = ctxA.createGain(); delayGain.gain.value=0.32;
+    delay.connect(delayGain); delayGain.connect(delay); delayGain.connect(master);
+
+    const padGain = ctxA.createGain(); padGain.gain.value=0.045;
+    const padFilter = ctxA.createBiquadFilter(); padFilter.type='lowpass';
+    padFilter.frequency.value=650; padFilter.Q.value=0.6;
+    padGain.connect(padFilter); padFilter.connect(master); padFilter.connect(delay);
+    const lfo = ctxA.createOscillator(); lfo.frequency.value=0.045;
+    const lfoG = ctxA.createGain(); lfoG.gain.value=300;
+    lfo.connect(lfoG); lfoG.connect(padFilter.frequency); lfo.start();
+    for (let i=0;i<4;i++){
+      const o = ctxA.createOscillator(); o.type = i%2?'triangle':'sine';
+      const g = ctxA.createGain(); g.gain.value=0.25;
+      o.detune.value=(Math.random()-0.5)*9;
+      o.connect(g); g.connect(padGain); o.start(); padOscs.push(o);
+    }
+    let idx=0; setChord(0);
+    setInterval(()=>{ idx=(idx+1)%chords.length; setChord(idx); }, 12000);
+
+    // orbit hum — one reusable oscillator faded in/out
+    orbitOsc = ctxA.createOscillator(); orbitOsc.type='sine';
+    orbitGain = ctxA.createGain(); orbitGain.gain.value=0;
+    const og2 = ctxA.createGain(); og2.gain.value=0.5;
+    orbitOsc.connect(orbitGain); orbitGain.connect(og2); og2.connect(master); og2.connect(delay);
+    orbitOsc.start();
+
+    master.gain.linearRampToValueAtTime(0.8, ctxA.currentTime+3.5);
+  }
+  function setChord(i){
+    const now = ctxA.currentTime;
+    chords[i].forEach((m,k)=>padOscs[k]?.frequency.exponentialRampToValueAtTime(midi(m), now+5));
+  }
+  function orbitHum(noteDeg, intensity){ // intensity 0..1, 0 = off
+    if (!started) return;
+    const t = ctxA.currentTime;
+    if (intensity > 0) orbitOsc.frequency.setTargetAtTime(midi(ROOT+12+noteDeg), t, 0.08);
+    orbitGain.gain.setTargetAtTime(intensity*0.12, t, 0.12);
+  }
+  function tone(freq, vol, dur, type='sine', when=0){
+    const now = ctxA.currentTime + when;
+    const o = ctxA.createOscillator(); o.type=type; o.frequency.value=freq;
+    const g = ctxA.createGain(); g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(vol, now+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, now+dur);
+    o.connect(g); g.connect(master); g.connect(delay);
+    o.start(now); o.stop(now+dur+0.1);
+  }
+  function sling(mult){ // arpeggio height = multiplier
+    if (!started) return;
+    const steps = Math.min(mult, 5);
+    for (let i=0;i<steps;i++)
+      tone(midi(ROOT+24 + SUN_NOTES[i % SUN_NOTES.length] + 12*Math.floor(i/SUN_NOTES.length)), 0.16, 1.4, 'sine', i*0.07);
+  }
+  function mote(streak){
+    if (!started) return;
+    const deg = SUN_NOTES[streak % SUN_NOTES.length] + 12*Math.min(Math.floor(streak/SUN_NOTES.length), 2);
+    tone(midi(ROOT+24+deg), 0.2, 1.6);
+  }
+  function flare(){ if (started){ tone(midi(ROOT+36), 0.22, 2.0); tone(midi(ROOT+43), 0.1, 1.6, 'sine', 0.06); } }
+  function burn(){
+    if (!started) return;
+    const now = ctxA.currentTime;
+    const o = ctxA.createOscillator(); o.type='sawtooth';
+    o.frequency.setValueAtTime(220, now);
+    o.frequency.exponentialRampToValueAtTime(45, now+1.1);
+    const f = ctxA.createBiquadFilter(); f.type='lowpass'; f.frequency.value=800;
+    const g = ctxA.createGain(); g.gain.setValueAtTime(0.24, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now+1.3);
+    o.connect(f); f.connect(g); g.connect(master);
+    o.start(now); o.stop(now+1.4);
+  }
+  function drain(){ if (started){ tone(120, 0.18, 1.4, 'triangle'); tone(90, 0.14, 1.8, 'sine', 0.1); } }
+  return { start, orbitHum, sling, mote, flare, burn, drain };
+})();
+
+// ============================================================
+//  FEEDBACK
+// ============================================================
+function popText(text, color, wx, wy){
+  const el = document.createElement('div');
+  el.className='pop'; el.textContent=text; el.style.color=color;
+  el.style.left=(wx-cam.x)+'px'; el.style.top=(wy-cam.y)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1250);
+}
+function toast(text, color){
+  toastEl.textContent = text; toastEl.style.color = color;
+  toastEl.classList.add('on');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>toastEl.classList.remove('on'), 1400);
+}
+function burst(x, y, color, n, spd){
+  for (let k=0;k<n;k++){
+    const a = Math.random()*Math.PI*2, s = spd*(0.4+Math.random());
+    bursts.push({ x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, life:1, color });
+  }
+}
+function multOf(speed){ return Math.max(1, Math.floor(speed / BASE_SPEED)); }
+function updateMultHUD(){
+  const m = multOf(comet.speed);
+  multEl.textContent = '×'+m;
+  multEl.classList.toggle('hot', m>=2 && m<4);
+  multEl.classList.toggle('blaze', m>=4);
+}
+
+// ============================================================
+//  UPDATE
+// ============================================================
+function nearestSun(){
+  let best=null, bd=Infinity;
+  for (const s of suns){
+    const d = Math.hypot(s.x-comet.x, s.y-comet.y);
+    if (d < bd){ bd=d; best=s; }
+  }
+  return { sun: best, d: bd };
+}
+
+function update(dt){
+  game.t += dt;
+
+  // ---------- ORBITING ----------
+  if (comet.orbiting){
+    const s = comet.orbiting;
+    if (!holding){
+      // RELEASE — slingshot on the tangent
+      const tang = comet.orbitA + comet.orbitDir * Math.PI/2;
+      comet.vx = Math.cos(tang)*comet.speed;
+      comet.vy = Math.sin(tang)*comet.speed;
+      comet.orbiting = null;
+      game.slings++; slingsEl.textContent = game.slings;
+      const m = multOf(comet.speed);
+      audio.sling(m);
+      audio.orbitHum(0, 0);
+      ripples.push({ x:s.x, y:s.y, r:comet.orbitR, life:1 });
+      if (m >= 3) popText('SLING ×'+m, '#9fd8ff', comet.x, comet.y-24);
+      game.shake = Math.min(10, m*2);
+    } else {
+      // spiral in + spin up: this is where speed is earned
+      comet.orbitR = Math.max(s.r + 10, comet.orbitR - TIGHTEN*dt);
+      const closeness = 1 - (comet.orbitR - s.r) / CAPTURE_RANGE; // 0..1
+      comet.speed = Math.min(MAX_SPEED, comet.speed + SPIN_UP * (0.4 + closeness*1.4) * dt);
+      const angV = comet.speed / comet.orbitR * 60;
+      comet.orbitA += comet.orbitDir * angV * dt;
+      comet.x = s.x + Math.cos(comet.orbitA)*comet.orbitR;
+      comet.y = s.y + Math.sin(comet.orbitA)*comet.orbitR;
+      audio.orbitHum(s.note, 0.3 + closeness*0.7);
+      // touch the sun = burn
+      if (comet.orbitR <= s.r + 11) doBurn(s);
+    }
+  }
+  // ---------- FREE FLIGHT ----------
+  else {
+    if (holding){
+      const { sun, d } = nearestSun();
+      if (sun && d < CAPTURE_RANGE + sun.r){
+        // CAPTURE — orbit direction from approach side (cross product)
+        comet.orbiting = sun;
+        comet.orbitR = Math.max(sun.r + 14, d);
+        comet.orbitA = Math.atan2(comet.y - sun.y, comet.x - sun.x);
+        const rx = comet.x - sun.x, ry = comet.y - sun.y;
+        comet.orbitDir = (rx * comet.vy - ry * comet.vx) > 0 ? 1 : -1;
+        ripples.push({ x:sun.x, y:sun.y, r:comet.orbitR, life:0.7 });
+      }
+    }
+    // speed slowly relaxes toward cruise — spend your slingshot fast
+    if (comet.speed > BASE_SPEED){
+      comet.speed = Math.max(BASE_SPEED, comet.speed - SPEED_DECAY*dt);
+      const cur = Math.hypot(comet.vx, comet.vy) || 1;
+      comet.vx = comet.vx/cur*comet.speed;
+      comet.vy = comet.vy/cur*comet.speed;
+    }
+    // dark stars tug at the comet
+    for (const v of voids){
+      const dx = v.x-comet.x, dy = v.y-comet.y, d = Math.hypot(dx,dy);
+      if (d < 300){
+        const pull = (1 - d/300) * 5.5 * dt * 60 / Math.max(d,30);
+        comet.vx += dx*pull*0.06; comet.vy += dy*pull*0.06;
+        if (d < v.r) doDrain(v);
+      }
+    }
+    comet.x += comet.vx*dt*60;
+    comet.y += comet.vy*dt*60;
+    audio.orbitHum(0, 0);
+  }
+
+  updateMultHUD();
+  vignette.classList.toggle('fast', multOf(comet.speed) >= 3);
+
+  // trail
+  comet.trail.unshift({ x:comet.x, y:comet.y });
+  const maxTrail = 20 + Math.floor(comet.speed*4);
+  while (comet.trail.length > maxTrail) comet.trail.pop();
+
+  // camera: lead the comet, zoomless
+  cam.x += (comet.x + comet.vx*16 - W/2 - cam.x)*0.06;
+  cam.y += (comet.y + comet.vy*16 - H/2 - cam.y)*0.06;
+
+  // ---------- PICKUPS ----------
+  const m = multOf(comet.speed);
+  for (let i=motes.length-1;i>=0;i--){
+    const mo = motes[i];
+    const d = Math.hypot(mo.x-comet.x, mo.y-comet.y);
+    if (d < 60 && d > 18){ // gentle magnet
+      mo.x += (comet.x-mo.x)/d*2.4; mo.y += (comet.y-mo.y)/d*2.4;
+    }
+    if (d < 20){
+      const pts = MOTE_VALUE * m;
+      game.score += pts; game.streak++;
+      scoreEl.textContent = game.score; streakEl.textContent = game.streak;
+      popText('+'+pts, m>=3 ? '#ffb54d' : '#cfeaff', mo.x, mo.y-14);
+      burst(mo.x, mo.y, '#cfeaff', 14, 2.5);
+      audio.mote(game.streak);
+      multEl.classList.add('bump'); setTimeout(()=>multEl.classList.remove('bump'), 220);
+      motes.splice(i,1);
+    }
+  }
+  for (let i=flares.length-1;i>=0;i--){
+    const f = flares[i];
+    f.a += 0.25*dt;
+    const fx = f.sun.x + Math.cos(f.a)*f.dist, fy = f.sun.y + Math.sin(f.a)*f.dist;
+    if (Math.hypot(fx-comet.x, fy-comet.y) < 22){
+      const pts = FLARE_VALUE * m;
+      game.score += pts; game.streak += 2;
+      scoreEl.textContent = game.score; streakEl.textContent = game.streak;
+      popText('FLARE +'+pts, '#ff9d4d', fx, fy-16);
+      burst(fx, fy, '#ffb54d', 30, 3.5);
+      audio.flare();
+      game.shake = Math.max(game.shake, 6);
+      flares.splice(i,1);
+    }
+  }
+
+  // ripples & bursts
+  for (let i=ripples.length-1;i>=0;i--){
+    ripples[i].r += 140*dt; ripples[i].life -= dt*1.3;
+    if (ripples[i].life <= 0) ripples.splice(i,1);
+  }
+  for (let i=bursts.length-1;i>=0;i--){
+    const b = bursts[i];
+    b.x += b.vx; b.y += b.vy; b.vx*=0.97; b.vy*=0.97; b.life -= dt*1.15;
+    if (b.life <= 0) bursts.splice(i,1);
+  }
+
+  game.shake *= Math.pow(0.001, dt);
+  if (game.burnT > 0) game.burnT -= dt;
+
+  populateWorld();
+}
+
+function doBurn(s){
+  // bounce off the surface, lose light + streak
+  const lost = Math.floor(game.score * BURN_PENALTY);
+  game.score -= lost; scoreEl.textContent = game.score;
+  game.streak = 0; streakEl.textContent = 0;
+  comet.orbiting = null;
+  const away = Math.atan2(comet.y-s.y, comet.x-s.x);
+  comet.speed = BASE_SPEED*1.4;
+  comet.vx = Math.cos(away)*comet.speed*2.2;
+  comet.vy = Math.sin(away)*comet.speed*2.2;
+  comet.x = s.x + Math.cos(away)*(s.r+40);
+  comet.y = s.y + Math.sin(away)*(s.r+40);
+  burst(comet.x, comet.y, '#ff7a33', 40, 4.5);
+  if (lost > 0) popText('-'+lost, '#ff5d3b', comet.x, comet.y-26);
+  toast('P E R I H E L I O N   B R E A C H', '#ff7a4d');
+  vignette.classList.add('burn');
+  setTimeout(()=>vignette.classList.remove('burn'), 700);
+  game.shake = 16; game.burnT = 1;
+  audio.burn(); audio.orbitHum(0,0);
+}
+
+function doDrain(v){
+  const lost = Math.floor(game.score * 0.1);
+  game.score -= lost; scoreEl.textContent = game.score;
+  game.streak = 0; streakEl.textContent = 0;
+  const away = Math.atan2(comet.y-v.y, comet.x-v.x) + (Math.random()-0.5);
+  comet.speed = BASE_SPEED;
+  comet.vx = Math.cos(away)*BASE_SPEED*2.4;
+  comet.vy = Math.sin(away)*BASE_SPEED*2.4;
+  comet.x = v.x + Math.cos(away)*(v.r+50);
+  comet.y = v.y + Math.sin(away)*(v.r+50);
+  burst(comet.x, comet.y, '#b06aff', 30, 3.5);
+  if (lost > 0) popText('-'+lost, '#b06aff', comet.x, comet.y-26);
+  toast('L I G H T   D R A I N E D', '#b06aff');
+  game.shake = 10;
+  audio.drain();
+}
+
+// ============================================================
+//  DRAW
+// ============================================================
+function draw(){
+  ctx.fillStyle = '#030208';
+  ctx.fillRect(0,0,W,H);
+
+  ctx.save();
+  const shx=(Math.random()-0.5)*game.shake, shy=(Math.random()-0.5)*game.shake;
+  ctx.translate(-cam.x+shx, -cam.y+shy);
+
+  // stars
+  const WRAP = 8000;
+  stars.forEach(s=>{
+    let sx=(s.x - cam.x*s.par)%WRAP, sy=(s.y - cam.y*s.par)%WRAP;
+    if (sx<0)sx+=WRAP; if (sy<0)sy+=WRAP;
+    ctx.fillStyle=`rgba(255,250,240,${s.op})`;
+    ctx.fillRect(sx+cam.x-2000, sy+cam.y-2000, s.size, s.size);
+  });
+
+  ctx.globalCompositeOperation='lighter';
+
+  // capture-range hint: line to nearest sun when free & in range
+  if (!comet.orbiting){
+    const { sun, d } = nearestSun();
+    if (sun && d < CAPTURE_RANGE + sun.r){
+      ctx.strokeStyle = `rgba(255,215,150,${holding?0.35:0.14})`;
+      ctx.setLineDash([4,8]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(comet.x, comet.y); ctx.lineTo(sun.x, sun.y); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  // voids
+  voids.forEach(v=>{
+    ctx.globalCompositeOperation='source-over';
+    const g0 = ctx.createRadialGradient(v.x,v.y,0, v.x,v.y,v.r*3);
+    g0.addColorStop(0,'rgba(8,2,16,0.95)');
+    g0.addColorStop(0.4,'rgba(30,8,50,0.35)');
+    g0.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g0; ctx.beginPath(); ctx.arc(v.x,v.y,v.r*3,0,Math.PI*2); ctx.fill();
+    ctx.globalCompositeOperation='lighter';
+    ctx.strokeStyle=`rgba(176,106,255,${0.3+Math.sin(game.t*3)*0.15})`;
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(v.x,v.y,v.r,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(v.x,v.y,v.r + 8 + Math.sin(game.t*2)*4, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(176,106,255,0.12)'; ctx.stroke();
+  });
+
+  // suns
+  suns.forEach(s=>{
+    const flick = 1 + Math.sin(game.t*3 + s.phase)*0.05;
+    const g = ctx.createRadialGradient(s.x,s.y,0, s.x,s.y,s.r*4);
+    g.addColorStop(0, `hsla(${s.hue}, 100%, 88%, 0.95)`);
+    g.addColorStop(0.12, `hsla(${s.hue}, 95%, 65%, 0.6)`);
+    g.addColorStop(0.4, `hsla(${s.hue}, 90%, 50%, 0.12)`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r*4*flick, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle=`hsla(${s.hue}, 100%, 92%, 1)`;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r*flick, 0, Math.PI*2); ctx.fill();
+  });
+
+  // orbit ring while tethered
+  if (comet.orbiting){
+    const s = comet.orbiting;
+    ctx.strokeStyle='rgba(180,225,255,0.35)';
+    ctx.lineWidth=1;
+    ctx.setLineDash([3,7]);
+    ctx.beginPath(); ctx.arc(s.x, s.y, comet.orbitR, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+    // tangent arrow: shows where release will fling you
+    const tang = comet.orbitA + comet.orbitDir*Math.PI/2;
+    ctx.strokeStyle='rgba(159,216,255,0.7)';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(comet.x, comet.y);
+    ctx.lineTo(comet.x + Math.cos(tang)*40, comet.y + Math.sin(tang)*40);
+    ctx.stroke();
+  }
+
+  // capture ripples
+  ripples.forEach(r=>{
+    ctx.strokeStyle=`rgba(255,220,160,${r.life*0.4})`;
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI*2); ctx.stroke();
+  });
+
+  // flares
+  flares.forEach(f=>{
+    const fx=f.sun.x+Math.cos(f.a)*f.dist, fy=f.sun.y+Math.sin(f.a)*f.dist;
+    ctx.save(); ctx.translate(fx,fy); ctx.rotate(f.a*2);
+    ctx.shadowBlur=18; ctx.shadowColor='#ff9d4d';
+    ctx.fillStyle='#ffd9a0';
+    const s0 = 7 + Math.sin(game.t*5+f.a)*1.5;
+    ctx.beginPath(); ctx.moveTo(0,-s0); ctx.lineTo(s0,0); ctx.lineTo(0,s0); ctx.lineTo(-s0,0); ctx.fill();
+    ctx.restore();
+  });
+
+  // motes
+  motes.forEach(m=>{
+    const tw = 0.5 + Math.sin(game.t*4 + m.phase)*0.5;
+    ctx.fillStyle=`rgba(207,234,255,${0.4+tw*0.6})`;
+    ctx.shadowBlur=8*tw; ctx.shadowColor='#cfeaff';
+    ctx.beginPath(); ctx.arc(m.x, m.y, 2.6+tw*1.4, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+  });
+
+  // bursts
+  bursts.forEach(b=>{
+    ctx.globalAlpha=Math.max(0,b.life);
+    ctx.fillStyle=b.color;
+    ctx.beginPath(); ctx.arc(b.x,b.y,2.1,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  });
+
+  // comet tail
+  if (comet.trail.length > 2){
+    const m = multOf(comet.speed);
+    ctx.beginPath();
+    ctx.moveTo(comet.trail[0].x, comet.trail[0].y);
+    for (let i=1;i<comet.trail.length-2;i++){
+      const xc=(comet.trail[i].x+comet.trail[i+1].x)/2;
+      const yc=(comet.trail[i].y+comet.trail[i+1].y)/2;
+      ctx.quadraticCurveTo(comet.trail[i].x, comet.trail[i].y, xc, yc);
+    }
+    const tailColor = m>=4 ? '#ff5d8f' : m>=2 ? '#ffb54d' : '#9fd8ff';
+    ctx.shadowBlur=16; ctx.shadowColor=tailColor;
+    const g = ctx.createLinearGradient(comet.trail[0].x, comet.trail[0].y,
+      comet.trail[comet.trail.length-1].x, comet.trail[comet.trail.length-1].y);
+    g.addColorStop(0, tailColor); g.addColorStop(1, 'rgba(159,216,255,0)');
+    ctx.strokeStyle=g;
+    ctx.lineWidth=2.5 + m*0.8;
+    ctx.lineCap='round';
+    ctx.stroke();
+    ctx.shadowBlur=0;
+  }
+
+  // comet head
+  ctx.shadowBlur=22; ctx.shadowColor='#e8f4ff';
+  ctx.fillStyle= game.burnT > 0 ? '#ffb08a' : '#ffffff';
+  ctx.beginPath(); ctx.arc(comet.x, comet.y, 5.5, 0, Math.PI*2); ctx.fill();
+  ctx.shadowBlur=0;
+
+  ctx.restore();
+
+  // edge indicator toward nearest flare cluster (richest sun)
+  ctx.globalCompositeOperation='source-over';
+  let bestSun=null, bd=Infinity;
+  for (const f of flares){
+    const d = Math.hypot(f.sun.x-comet.x, f.sun.y-comet.y);
+    if (d < bd){ bd=d; bestSun=f.sun; }
+  }
+  if (bestSun){
+    const sx=bestSun.x-cam.x, sy=bestSun.y-cam.y, mg=52;
+    if (sx<mg||sx>W-mg||sy<mg+60||sy>H-mg){
+      const ang=Math.atan2(sy-H/2, sx-W/2);
+      const ex=Math.max(mg,Math.min(W-mg, W/2+Math.cos(ang)*10000));
+      const ey=Math.max(mg+64,Math.min(H-mg, H/2+Math.sin(ang)*10000));
+      ctx.save(); ctx.translate(ex,ey); ctx.rotate(ang);
+      ctx.globalAlpha=0.8; ctx.fillStyle='#ffc97a';
+      ctx.shadowBlur=10; ctx.shadowColor='#ffc97a';
+      ctx.beginPath();
+      ctx.moveTo(8,0); ctx.lineTo(-6,6); ctx.lineTo(-2.5,0); ctx.lineTo(-6,-6);
+      ctx.closePath(); ctx.fill();
+      ctx.restore(); ctx.globalAlpha=1;
+    }
+  }
+}
+
+// ============================================================
+//  LOOP + START
+// ============================================================
+let last = performance.now();
+function loop(now){
+  const dt = Math.min((now-last)/1000, 0.05);
+  last = now;
+  if (game.playing) update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+document.getElementById('start-btn').addEventListener('click', ()=>{
+  audio.start();
+  document.getElementById('intro').classList.add('hidden');
+  hudEl.style.opacity=1;
+  game.playing=true;
+  spawnSun(340, 60);           // a first sun right in your path
+  populateWorld();
+  last = performance.now();
+  requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>
