@@ -2,12 +2,12 @@ export const siteConfig = {
   name: "Gonzague Teisseire",
   kicker: "MSc @ EDHEC · Lille / London",
   title: "I make things, then I make people care about them.",
-  roles: ["AI tools", "RAG pipelines", "desktop apps", "launch films", "pitches"],
-  stats: [
-    { value: 0.89, decimals: 2, suffix: "", label: "MRR on recall's retrieval eval" },
-    { value: 80, decimals: 0, suffix: "%", label: "mindwatch agreement on held-out labels" },
-    { value: 3, decimals: 0, suffix: "", label: "Top-3 finish, EDHEC Sustainability Challenge", prefix: "Top " },
-    { value: 6, decimals: 0, suffix: "+", label: "founders interviewed on Entrepreneurship Bites" },
+  roles: [
+    { label: "AI tools", href: "#projects" },
+    { label: "RAG pipelines", href: "#recall" },
+    { label: "LLM evals", href: "#mindwatch" },
+    { label: "desktop apps", href: "#huddle" },
+    { label: "launch films", href: "#loop" },
   ],
   photo: {
     src: "/img/hero.jpg",
@@ -91,15 +91,6 @@ export const siteConfig = {
   ],
   experience: [
     {
-      company: "Gentek.ai · London / Lisbon",
-      title: "Marketing, Sales & Product Intern",
-      dateRange: "May – Aug 2025",
-      bullets: [
-        "Trusted by the founders of a 13-person AI startup to run marketing campaigns end to end, from strategy to execution",
-        "Mapped user journeys for two AI products with the engineering team; internal platform demo",
-      ],
-    },
-    {
       company: "Cosysense · London (Imperial College project)",
       title: "Business Model Consultant",
       dateRange: "Jan – Apr 2026",
@@ -114,6 +105,15 @@ export const siteConfig = {
       dateRange: "Nov 2025 – Sept 2026",
       bullets: [
         "Interviewed more than six serial entrepreneurs; booking, recording, publishing, then handover",
+      ],
+    },
+    {
+      company: "Gentek.ai · London / Lisbon",
+      title: "Marketing, Sales & Product Intern",
+      dateRange: "May – Aug 2025",
+      bullets: [
+        "Trusted by the founders of a 13-person AI startup to run marketing campaigns end to end, from strategy to execution",
+        "Mapped user journeys for two AI products with the engineering team; internal platform demo",
       ],
     },
     {
@@ -150,7 +150,7 @@ export const siteConfig = {
       school: "Imperial College Business School · London",
       degree: "MSc Innovation, Entrepreneurship & Management",
       image: "/img/imperial.jpg",
-      imageAlt: "Imperial College Business School campus",
+      imageAlt: "Gonzague with his Imperial team after their presentation",
       dateRange: "2025 – 2026",
       achievements: [
         "Venture creation, innovation and technology management, design thinking",

@@ -34,6 +34,7 @@ const span = (i: number) => (i === 0 ? "md:col-span-2" : "md:col-span-1");
         {projects.map((p, i) => (
           <a
             href={p.link}
+            id={p.name.toLowerCase().split(" ")[0]}
             target="_blank"
             rel="noopener noreferrer"
             data-cats={(p.category ?? []).join(",")}

@@ -17,7 +17,7 @@ const items = siteConfig.experience ?? [];
         <ol class="lg:col-span-8 relative border-l border-gray-200 ml-2">
           {items.map((e, i) => (
             <li class="pl-8 pb-2 relative reveal">
-              <span class="absolute -left-[7px] top-6 w-3.5 h-3.5 rounded-full border-2 border-white ring-1 ring-gray-300 dot" />
+              <span class="absolute -left-[7px] top-[1.65rem] w-3.5 h-3.5 rounded-full border-2 border-white ring-1 ring-gray-300 dot" />
               <details class="group rounded-2xl hover:bg-white open:bg-white open:shadow-sm open:ring-1 open:ring-gray-200 transition-colors" open={i === 0}>
                 <summary class="list-none cursor-pointer p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6">
                   <span class="font-mono text-xs sm:text-sm text-gray-500 sm:w-40 shrink-0">{e.dateRange}</span>

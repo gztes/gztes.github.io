@@ -32,9 +32,9 @@ const links = [
       <p class="mt-4 text-lg sm:text-xl text-gray-900 rise d2" aria-live="polite">
         Right now I build
         <span class="relative inline-block align-bottom overflow-hidden h-[1.4em]">
-          <span id="role" class="inline-block font-semibold accent transition-all duration-300"
-            >{siteConfig.roles[0]}</span
-          ><span class="caret accent">|</span>
+          <a id="role" href={siteConfig.roles[0].href}
+            class="inline-block font-semibold accent underline decoration-2 decoration-transparent underline-offset-4 hover:decoration-current transition-all duration-300"
+            >{siteConfig.roles[0].label} <span aria-hidden="true" class="text-base">→</span></a>
         </span>
       </p>
       <div class="mt-10 flex flex-wrap gap-3 rise d3">
@@ -81,12 +81,19 @@ const links = [
   const el = document.getElementById("role");
   let i = 0;
   if (el && !reduced) {
+    let paused = false;
+    el.addEventListener("pointerenter", () => (paused = true));
+    el.addEventListener("pointerleave", () => (paused = false));
+    el.addEventListener("focus", () => (paused = true));
+    el.addEventListener("blur", () => (paused = false));
     setInterval(() => {
+      if (paused) return;
       el.style.transform = "translateY(-100%)";
       el.style.opacity = "0";
       setTimeout(() => {
         i = (i + 1) % roles.length;
-        el.textContent = roles[i];
+        el.innerHTML = roles[i].label + ' <span aria-hidden="true" class="text-base">→</span>';
+        el.setAttribute("href", roles[i].href);
         el.style.transition = "none";
         el.style.transform = "translateY(100%)";
         requestAnimationFrame(() => {
@@ -125,10 +132,9 @@ const links = [
   .d2 { animation-delay: 0.2s; }
   .d3 { animation-delay: 0.3s; }
   @keyframes blink { 50% { opacity: 0; } }
-  .caret { animation: blink 1s steps(1) infinite; margin-left: 2px; font-weight: 300; }
   @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
   .ping { animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
   @media (prefers-reduced-motion: reduce) {
-    .rise, .caret, .ping { animation: none; }
+    .rise, .ping { animation: none; }
   }
 </style>
