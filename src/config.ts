@@ -24,7 +24,7 @@ export const siteConfig = {
     github: "https://github.com/gztes",
   },
   aboutMe:
-    "Commercial profile who can also build. I ran marketing campaigns end to end at an AI startup in London, co-founded an entrepreneurship podcast at Imperial College London, and design AI apps and tools from prototype to pitch. MSc student at EDHEC after Imperial and ESCP. French and British, bilingual.",
+    "Commercial profile who can also build. I ran marketing campaigns end to end at an AI startup in London, co-founded an entrepreneurship podcast at Imperial College London, and build AI apps and tools from prototype to pitch. MSc student at EDHEC after Imperial and ESCP. French and British, bilingual.",
   skills: [
     "Python",
     "TypeScript",
@@ -140,6 +140,7 @@ recall     48%`,
       title: "Technology & Data Intern",
       dateRange: "May – Jun 2024",
       bullets: [
+        "Fintech SaaS for asset managers and hedge funds",
         "AI competitor landscape across 3 sectors, turned into 2 product and positioning recommendations",
         "Audited and restructured 10,000+ CRM records in HubSpot",
       ],
